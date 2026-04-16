@@ -4,9 +4,18 @@ import HandTracker from "./components/HandTracker.vue";
 import AbacusBoard from "./components/AbacusBoard.vue";
 
 const gesture = ref({
-  x: 0,
-  y: 0,
-  pinch: false,
+  indexX: 0,
+  indexY: 0,
+  thumbX: 0,
+  thumbY: 0,
+  indexSegment: 0,
+  thumbSegment: 0,
+  indexInTopZone: false,
+  thumbInBottomZone: false,
+  bottomStepSeq: 0,
+  bottomStepDir: 0,
+  bottomStepColumn: 0,
+  lastBottomHud: "—",
   fingerCount: 0,
   hasHand: false,
 });
@@ -14,9 +23,11 @@ const gesture = ref({
 
 <template>
   <main class="home">
-    <AbacusBoard :gesture="gesture" />
+    <div class="boardStage">
+      <AbacusBoard :gesture="gesture" />
+    </div>
 
-    <div class="cameraCorner" aria-label="Vista de cámara">
+    <aside class="cameraRail" aria-label="Vista de cámara">
       <HandTracker @gesture="(g) => (gesture = g)" />
       <div class="hud">
         <div class="chip">
@@ -26,32 +37,65 @@ const gesture = ref({
           Dedos: <b>{{ gesture.fingerCount }}</b>
         </div>
         <div class="chip">
-          Pinza: <b>{{ gesture.pinch ? "sí" : "no" }}</b>
+          Columna índice: <b>{{ gesture.indexSegment + 1 }}</b>
+        </div>
+        <div class="chip">
+          Columna pulgar: <b>{{ gesture.thumbSegment + 1 }}</b>
+        </div>
+        <div class="chip">
+          Zona índice: <b>{{ gesture.indexInTopZone ? "sí" : "no" }}</b>
+        </div>
+        <div class="chip">
+          Zona pulgar: <b>{{ gesture.thumbInBottomZone ? "sí" : "no" }}</b>
+        </div>
+        <div class="chip">
+          Pasos abajo: <b>#{{ gesture.bottomStepSeq }}</b>
+        </div>
+        <div class="chip">
+          Último: <b>{{ gesture.lastBottomHud }}</b>
         </div>
       </div>
-    </div>
+    </aside>
   </main>
 </template>
 
 <style scoped>
 .home {
-  position: relative;
+  --camera-rail-width: clamp(168px, 28vw, 360px);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
   width: 100%;
   height: 100svh;
   overflow: hidden;
+  box-sizing: border-box;
+  gap: 0;
 }
 
-.cameraCorner {
-  position: absolute;
-  right: 18px;
-  bottom: 18px;
-  width: min(360px, 42vw);
-  border-radius: 18px;
+.boardStage {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 10px 8px 10px 12px;
+  box-sizing: border-box;
+}
+
+.cameraRail {
+  flex: 0 0 var(--camera-rail-width);
+  width: var(--camera-rail-width);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  overflow: auto;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(8px);
-  background: rgba(20, 20, 25, 0.35);
+  background: rgba(20, 20, 25, 0.42);
 }
 
 .hud {
